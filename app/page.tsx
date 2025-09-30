@@ -4,8 +4,17 @@ import Link from 'next/link';
 import styles from '@/app/ui/home.module.css';
 import { lusitana } from '@/app/ui/fonts';
 import Image from 'next/image';
+import { neon } from '@neondatabase/serverless';
 
 export default function Page() {
+  async function create(formData: FormData) {
+    'use server';
+    // Connect to the Neon database
+    const sql = neon(process.env.DATABASE_URL as string);
+    const comment = formData.get('comment');
+    // Insert the comment from the form into the Postgres database
+    await sql`INSERT INTO comments (comment) VALUES (${comment})`;
+  }
   return (
     <main className="flex min-h-screen flex-col p-6">
       <div className="flex h-20 shrink-0 items-end rounded-lg bg-blue-500 p-4 md:h-52">
@@ -46,6 +55,10 @@ export default function Page() {
             alt="Screenshots of the dashboard project showing desktop version"
           />
         </div>
+        <form action={create}>
+          <input type="text" placeholder="write a comment" name="comment" />
+          <button type="submit">Submit</button>
+        </form>
       </div>
     </main>
   );
